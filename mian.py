@@ -40,7 +40,10 @@ def Input_Name():
                     os.makedirs('data/' + name)   # 创建该同学的目录
                     with open('data/' + name + '/name.txt', 'w') as file:   # 在该同学的目录下创建一个名为"name.txt"的文件
                         file.write(name)   # 将名字写入文件
-                    year()   # 调用year函数
+                    try:
+                        year()   # 调用year函数
+                    except AttributeError:
+                        pass
                     root1.destroy()   # 关闭窗口
         root1 = tk.Toplevel(root)   # 创建一个新的顶层窗口
         root1.geometry('300x300')   # 设置窗口大小为300x300像素
