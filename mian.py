@@ -1,6 +1,5 @@
 import tkinter as tk       # 导入tkinter模块，用于创建GUI界面
 import os                  # 导入os模块，用于操作文件和目录
-import time                # 导入time模块，用于延时操作
 
 # 设置窗口的宽度和高度
 width = 500
@@ -41,7 +40,6 @@ def Input_Name():
                     os.makedirs('data/' + name)   # 创建该同学的目录
                     with open('data/' + name + '/name.txt', 'w') as file:   # 在该同学的目录下创建一个名为"name.txt"的文件
                         file.write(name)   # 将名字写入文件
-                    time.sleep(5)   # 延时5秒
                     year()   # 调用year函数
                     root1.destroy()   # 关闭窗口
         root1 = tk.Toplevel(root)   # 创建一个新的顶层窗口
