@@ -1,7 +1,6 @@
 import tkinter as tk
 import os
-
-# 导入tkinter库和os库
+import sqlite3
 
 # 设置窗口的宽度和高度
 width = 500
@@ -33,6 +32,15 @@ text_1 = tk.Label(root, text="魏逸恺出品，必属精品", bg="#00BFFF", fg=
 text.pack()
 text_1.pack()
 
+# 创建数据库连接
+conn = sqlite3.connect('data/records.db')
+c = conn.cursor()
+
+# 创建数据表
+c.execute('''CREATE TABLE IF NOT EXISTS students
+             (name TEXT, year INTEGER)''')
+conn.commit()
+
 # 记录创建了多少个名字输入窗口
 root1_created = False
 
@@ -41,7 +49,7 @@ def Input_Name():
     global root1_created
     # 如果名字输入窗口还没有创建，则创建一个
     if not root1_created:
-        
+
         # 定义保存名字的函数
         def save_name():
             name = input_box.get()
@@ -50,14 +58,14 @@ def Input_Name():
             if ' ' in name or any(char.isdigit() for char in name):
                 error_label.config(text="名字输入错误")
             else:
-                # 检查同名文件夹是否已存在，如果存在则显示错误信息
-                if os.path.exists('data/' + name) == True:
+                # 检查同名记录是否已存在，如果存在则显示错误信息
+                c.execute("SELECT * FROM students WHERE name=?", (name,))
+                if c.fetchone() is not None:
                     error_label.config(text="已有该同学!")
                 else:
-                    # 创建同名文件夹，并在文件夹中创建name.txt文件并写入名字
-                    os.makedirs('data/' + name)
-                    with open('data/' + name + '/name.txt', 'w') as file:
-                        file.write(name)
+                    # 向数据库中插入记录
+                    c.execute("INSERT INTO students VALUES (?, NULL)", (name,))
+                    conn.commit()
                     try:
                         year()
                     except AttributeError:
@@ -77,25 +85,26 @@ def Input_Name():
         
         # 创建错误信息标签控件，并添加到名字输入窗口中
         error_label = tk.Label(root1, text="", fg="red") 
-        error_label.pack()  
+        error_label.pack()
         
         # 设置名字输入窗口已创建标志为True
-        root1_created = True  
+        root1_created = True 
 
 # 定义输入生日的函数
 def year():
     # 定义保存生日的函数
     def save_year():
         year = year_input.get()
-        
+         
         # 检查输入的生日是否为空或非数字，如果是则显示错误信息
-        if int(year) <= 1900 or int(year) >= 2300 or not year or not year.isdigit ():
+        if int(year) <= 1900 or int(year) >= 2300 or not year or not year.isdigit():
             error_label.config(text="生日输入错误")
         else:
-            # 获取最后一个文件夹的名字，并在该文件夹中创建year.txt文件并写入生日
-            name = os.listdir('data')[-1]
-            with open('data/' + name + '/year.txt', 'w') as file:
-                file.write(year)
+            # 获取最后一个记录的名字，并在该记录中更新生日
+            c.execute("SELECT name FROM students ORDER BY ROWID DESC LIMIT 1")
+            name = c.fetchone()[0]
+            c.execute("UPDATE students SET year=? WHERE name=?", (year, name))
+            conn.commit()
             root2.destroy()
     
     # 创建一个顶级窗口作为生日输入窗口
@@ -121,3 +130,6 @@ button.pack()
 
 # 运行主循环
 root.mainloop()
+
+# 关闭数据库连接
+conn.close()
