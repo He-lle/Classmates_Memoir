@@ -53,7 +53,7 @@ def Input_Name():
         # 定义保存名字的函数
         def save_name():
             name = input_box.get()
-            
+
             # 检查名字是否包含空格或数字，如果是则显示错误信息
             if ' ' in name or any(char.isdigit() for char in name):
                 error_label.config(text="名字输入错误")
@@ -71,53 +71,51 @@ def Input_Name():
                     except AttributeError:
                         pass
                     root1.destroy()
-        
+
         # 创建一个顶级窗口作为名字输入窗口
-        root1 = tk.Toplevel(root)   
-        root1.geometry('300x300')  
-        root1.title("输入同学姓名")   
-        
+        root1 = tk.Toplevel(root)
+        root1.geometry('300x300')
+        root1.title("输入同学姓名")
+
         # 创建输入框控件和确认按钮控件，并添加到名字输入窗口中
-        input_box = tk.Entry(root1)  
-        input_box.pack()  
-        confirm_button = tk.Button(root1, text="确认", command=save_name) 
-        confirm_button.pack() 
-        
+        input_box = tk.Entry(root1)
+        input_box.pack()
+        confirm_button = tk.Button(root1, text="确认", command=save_name)
+        confirm_button.pack()
+
         # 创建错误信息标签控件，并添加到名字输入窗口中
-        error_label = tk.Label(root1, text="", fg="red") 
+        error_label = tk.Label(root1, text="", fg="red")
         error_label.pack()
-        
+
         # 设置名字输入窗口已创建标志为True
-        root1_created = True 
+        root1_created = True
 
 # 定义输入生日的函数
 def year():
     # 定义保存生日的函数
     def save_year():
         year = year_input.get()
-         
+
         # 检查输入的生日是否为空或非数字，如果是则显示错误信息
-        if int(year) <= 1900 or int(year) >= 2300 or not year or not year.isdigit():
+        if not year or not year.isdigit() or int(year) <= 1900 or int(year) >= 2300:
             error_label.config(text="生日输入错误")
         else:
             # 获取最后一个记录的名字，并在该记录中更新生日
-            c.execute("SELECT name FROM students ORDER BY ROWID DESC LIMIT 1")
-            name = c.fetchone()[0]
-            c.execute("UPDATE students SET year=? WHERE name=?", (year, name))
+            c.execute("UPDATE students SET year=? WHERE rowid = (SELECT max(rowid) FROM students)", (year,))
             conn.commit()
             root2.destroy()
-    
+
     # 创建一个顶级窗口作为生日输入窗口
     root2 = tk.Toplevel(root)
     root2.geometry('300x300')
     root2.title("输入同学生日")
-    
+
     # 创建输入框控件和确认按钮控件，并添加到生日输入窗口中
     year_input = tk.Entry(root2)
     year_input.pack()
     confirm_button = tk.Button(root2, text="确认", command=save_year)
     confirm_button.pack()
-    
+
     # 创建错误信息标签控件，并添加到生日输入窗口中
     error_label = tk.Label(root2, text="", fg="red")
     error_label.pack()
