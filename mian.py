@@ -38,7 +38,7 @@ c = conn.cursor()
 
 # 创建数据表
 c.execute('''CREATE TABLE IF NOT EXISTS students
-             (name TEXT, year INTEGER)''')
+             (name TEXT, year INTEGER, gender TEXT)''')
 conn.commit()
 
 # 记录创建了多少个名字输入窗口
@@ -64,7 +64,7 @@ def Input_Name():
                     error_label.config(text="已有该同学!")
                 else:
                     # 向数据库中插入记录
-                    c.execute("INSERT INTO students VALUES (?, NULL)", (name,))
+                    c.execute("INSERT INTO students VALUES (?, NULL, NULL)", (name,))
                     conn.commit()
                     try:
                         year()
@@ -103,6 +103,7 @@ def year():
             # 获取最后一个记录的名字，并在该记录中更新生日
             c.execute("UPDATE students SET year=? WHERE rowid = (SELECT max(rowid) FROM students)", (year,))
             conn.commit()
+            gender()
             root2.destroy()
 
     # 创建一个顶级窗口作为生日输入窗口
@@ -119,6 +120,33 @@ def year():
     # 创建错误信息标签控件，并添加到生日输入窗口中
     error_label = tk.Label(root2, text="", fg="red")
     error_label.pack()
+
+# 定义选择性别的函数
+def gender():
+    # 定义保存性别的函数
+    def save_gender():
+        gender = gender_var.get()
+
+        # 如果性别选择框的值不为空，更新数据库中的性别记录
+        if gender:
+            c.execute("UPDATE students SET gender=? WHERE rowid = (SELECT max(rowid) FROM students)", (gender,))
+            conn.commit()
+            root3.destroy()
+
+    # 创建一个顶级窗口作为性别选择窗口
+    root3 = tk.Toplevel(root)
+    root3.geometry('300x300')
+    root3.title("选择同学性别")
+
+    # 创建性别选择框控件和确认按钮控件，并添加到性别选择窗口中
+    gender_var = tk.StringVar()
+    gender_var.set("")  # 设置默认值为空
+    male_radio = tk.Radiobutton(root3, text="男", variable=gender_var, value="男")
+    male_radio.pack()
+    female_radio = tk.Radiobutton(root3, text="女", variable=gender_var, value="女")
+    female_radio.pack()
+    confirm_button = tk.Button(root3, text="确认", command=save_gender)
+    confirm_button.pack()
 
 # 创建按钮和按钮框架，并添加到根窗口中
 button_frame = tk.Frame(root)
